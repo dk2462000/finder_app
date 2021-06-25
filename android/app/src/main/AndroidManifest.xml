@@ -1,7 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.finder_app_partner">
     <uses-permission android:name="android.permission.INTERNET" />
    <application
+        tools:replace="android:label"
         android:label="finder_app_partner"
         android:icon="@mipmap/ic_launcher">
         <activity

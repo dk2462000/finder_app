@@ -1,6 +1,12 @@
+
+
 import 'package:finder_app_partner/pages/chat.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:jitsi_meet/jitsi_meet.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io';
 
 class homescreen extends StatefulWidget {
   const homescreen({Key key}) : super(key: key);
@@ -17,10 +23,143 @@ class _homescreenState extends State<homescreen> {
   Image img_male ;
   Image img_female;
 
+
+  int _limit = 20;
+  int _limitIncrement = 20;
+  String groupChatId = "";
+  SharedPreferences prefs;
+
+
   void initState(){
     super.initState();
     img_male = male_imginactive;
     img_female = female_imginactive;
+    JitsiMeet.addListener(JitsiMeetingListener(
+        onConferenceWillJoin: _onConferenceWillJoin,
+        onConferenceJoined: _onConferenceJoined,
+        onConferenceTerminated: _onConferenceTerminated,
+        onError: _onError));
+
+  }
+
+
+  final serverText = TextEditingController();
+  final roomText = TextEditingController(text: "plugintestroom");
+  final subjectText = TextEditingController(text: "My Plugin Test Meeting");
+  final nameText = TextEditingController(text: "Plugin Test User");
+  final emailText = TextEditingController(text: "fake@email.com");
+  final iosAppBarRGBAColor =
+  TextEditingController(text: "#0080FF80"); //transparent blue
+  bool isAudioOnly = true;
+  bool isAudioMuted = true;
+  bool isVideoMuted = true;
+
+
+
+  @override
+  void dispose() {
+    super.dispose();
+    JitsiMeet.removeAllListeners();
+  }
+
+
+
+
+
+  _onAudioOnlyChanged(bool value) {
+    setState(() {
+      isAudioOnly = value;
+    });
+  }
+
+  _onAudioMutedChanged(bool value) {
+    setState(() {
+      isAudioMuted = value;
+    });
+  }
+
+  _onVideoMutedChanged(bool value) {
+    setState(() {
+      isVideoMuted = value;
+    });
+  }
+
+  _joinMeeting() async {
+    String serverUrl = serverText.text.trim().isEmpty ? null : serverText.text;
+
+    // Enable or disable any feature flag here
+    // If feature flag are not provided, default values will be used
+    // Full list of feature flags (and defaults) available in the README
+    Map<FeatureFlagEnum, bool> featureFlags = {
+      FeatureFlagEnum.WELCOME_PAGE_ENABLED: false,
+    };
+    if (!kIsWeb) {
+      // Here is an example, disabling features for each platform
+      if (Platform.isAndroid) {
+        // Disable ConnectionService usage on Android to avoid issues (see README)
+        featureFlags[FeatureFlagEnum.CALL_INTEGRATION_ENABLED] = false;
+      } else if (Platform.isIOS) {
+        // Disable PIP on iOS as it looks weird
+        featureFlags[FeatureFlagEnum.PIP_ENABLED] = false;
+      }
+    }
+    // Define meetings options here
+    var options = JitsiMeetingOptions(room: "${("Deep".length*100)+("Kapadia".length*100)}")
+      ..serverURL = serverUrl
+      ..subject = "Deep"
+      ..userDisplayName = "Deep"
+      ..userEmail = "dk@gmail.com"
+      ..iosAppBarRGBAColor = "#0080FF80"
+      ..audioOnly = true
+      ..audioMuted = true
+      ..videoMuted = true
+      ..featureFlags.addAll(featureFlags)
+      ..webOptions = {
+        "roomName":"anonymous",
+        "width": "100%",
+        "height": "100%",
+        "enableWelcomePage": false,
+        "chromeExtensionBanner": null,
+        "userInfo": {"displayName": "Deep"}
+      };
+
+    debugPrint("JitsiMeetingOptions: $options");
+    await JitsiMeet.joinMeeting(
+      options,
+      listener: JitsiMeetingListener(
+          onConferenceWillJoin: (message) {
+            debugPrint("${options.room} will join with message: $message");
+          },
+          onConferenceJoined: (message) {
+            debugPrint("${options.room} joined with message: $message");
+          },
+          onConferenceTerminated: (message) {
+            debugPrint("${options.room} terminated with message: $message");
+          },
+          genericListeners: [
+            JitsiGenericListener(
+                eventName: 'readyToClose',
+                callback: (dynamic message) {
+                  debugPrint("readyToClose callback");
+                }),
+          ]),
+    );
+  }
+
+  void _onConferenceWillJoin(message) {
+    debugPrint("_onConferenceWillJoin broadcasted with message: $message");
+  }
+
+  void _onConferenceJoined(message) {
+    debugPrint("_onConferenceJoined broadcasted with message: $message");
+  }
+
+  void _onConferenceTerminated(message) {
+    debugPrint("_onConferenceTerminated broadcasted with message: $message");
+  }
+
+  _onError(error) {
+    debugPrint("_onError broadcasted: $error");
   }
 
   @override
@@ -94,17 +233,24 @@ class _homescreenState extends State<homescreen> {
                               ),
                             ),
                           ),
-                          Container(
-                            height: 90,
+                          InkWell(
 
-                            width: w1,
-                            margin: EdgeInsets.only(bottom: 30),
-                            decoration: BoxDecoration(
-                              image: DecorationImage(
-                                image: AssetImage("assets/images/callnow.png"),
-                                fit: BoxFit.fill,
-                              ),
-                            ),),
+                              onTap: (){
+                                _joinMeeting();
+                              },
+
+                            child: Container(
+                              height: 90,
+
+                              width: w1,
+                              margin: EdgeInsets.only(bottom: 30),
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                  image: AssetImage("assets/images/callnow.png"),
+                                  fit: BoxFit.fill,
+                                ),
+                              ),),
+                          ),
                         ],
                       ),
                     ),

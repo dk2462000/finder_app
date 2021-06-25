@@ -1,4 +1,5 @@
 import 'package:finder_app_partner/pages/chat.dart';
+import 'package:finder_app_partner/pages/chat_content.dart';
 import 'package:finder_app_partner/pages/home_screen.dart';
 import 'package:finder_app_partner/pages/screen1.dart';
 import 'package:finder_app_partner/pages/screen2.dart';

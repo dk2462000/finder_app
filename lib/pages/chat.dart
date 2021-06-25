@@ -1,3 +1,4 @@
+import 'package:finder_app_partner/pages/chat_content.dart';
 import 'package:finder_app_partner/pages/home_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -148,17 +149,25 @@ class _chatscreenState extends State<chatscreen> {
                               ),
                             ),
                           ),
-                          Container(
-                            height: 90,
+                          InkWell(
+                            onTap: (){
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => chatcontentscreen()),
+                              );
+                            },
+                            child: Container(
+                              height: 90,
 
-                            width: w1,
-                            margin: EdgeInsets.only(bottom: 30),
-                            decoration: BoxDecoration(
-                              image: DecorationImage(
-                                image: AssetImage("assets/images/start_chat.png"),
-                                fit: BoxFit.fill,
-                              ),
-                            ),),
+                              width: w1,
+                              margin: EdgeInsets.only(bottom: 30),
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                  image: AssetImage("assets/images/start_chat.png"),
+                                  fit: BoxFit.fill,
+                                ),
+                              ),),
+                          ),
                         ],
                       ),
                     ),
